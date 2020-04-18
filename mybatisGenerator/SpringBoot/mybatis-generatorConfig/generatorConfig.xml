@@ -13,7 +13,7 @@
         </plugin>
 
         <jdbcConnection driverClass="com.mysql.cj.jdbc.Driver"
-                        connectionURL="jdbc:mysql://localhost:3306/imooc-video-dev?useSSL=false&amp;serverTimezone=UTC"
+                        connectionURL="jdbc:mysql://localhost:3306/online-chat-dev?useSSL=false&amp;serverTimezone=UTC"
                         userId="root"
                         password="yaxly960707">
         </jdbcConnection>
@@ -29,7 +29,11 @@
         type="XMLMAPPER"/>
 
 
-		<table tableName="comments"></table>
-		 
+		<table tableName="chat_msg"></table>
+        <table tableName="friends_request"></table>
+        <table tableName="my_friends"></table>
+        <table tableName="users"></table>
+
+
     </context>
 </generatorConfiguration>
