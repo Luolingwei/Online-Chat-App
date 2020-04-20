@@ -4,7 +4,7 @@ window.app = {
 	serverUrl: "http://192.168.1.178:8080",
 	
 	// 图片服务器地址
-	imgServerUrl: "",
+	imgServerUrl: "http://192.168.1.178:8080",
 	
 	/**
 	 * @param {Object} str
@@ -41,6 +41,13 @@ window.app = {
 		var userInfoStr = plus.storage.getItem("userInfo");
 		return JSON.parse(userInfoStr);
 	},
+	
+	// 登出后移除用户全局对象
+	userLogout: function(){
+		plus.storage.removeItem("userInfo");
+	}
+	
+	
 	
 	
 }
