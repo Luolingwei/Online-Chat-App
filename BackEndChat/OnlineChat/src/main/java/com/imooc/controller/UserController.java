@@ -1,5 +1,6 @@
 package com.imooc.controller;
 
+import com.imooc.enums.SearchFriendsStatusEnum;
 import com.imooc.pojo.Users;
 import com.imooc.pojo.bo.UsersBO;
 import com.imooc.pojo.vo.UsersVO;
@@ -66,7 +67,7 @@ public class UserController extends BasicController{
 
         System.out.println(uploadPathDB);
         System.out.println(finalPath);
-        
+
         File file = new File(dirPath);
         file.mkdirs();
 
@@ -96,6 +97,61 @@ public class UserController extends BasicController{
         Users result = userService.updateUserInfo(user);
 
         return IMoocJSONResult.ok(result);
+
+    }
+
+    /**
+     * 根据账号做匹配查询而不是模糊查询
+     */
+    @PostMapping("/search")
+    public IMoocJSONResult searchUser(String myUserId, String friendUsername) throws Exception {
+
+        // 判空
+        if (StringUtils.isBlank(myUserId) || StringUtils.isBlank(friendUsername)){
+            return IMoocJSONResult.errorMsg("");
+        }
+
+        // 1 搜索的用户不存在，"返回无此用户"
+        // 2 搜索的是自己，返回"不能添加自己"
+        // 3 搜索的已经是自己的好友，返回"该用户已经是你的好友"
+        Integer searchResult = userService.preconditionSearchFriends(myUserId,friendUsername);
+
+        if (searchResult == SearchFriendsStatusEnum.SUCCESS.status){
+            Users user = userService.querUserInfobyName(friendUsername);
+            UsersVO usersVO = new UsersVO();
+            BeanUtils.copyProperties(user,usersVO);
+            return IMoocJSONResult.ok(usersVO);
+
+        } else {
+            String errormsg = SearchFriendsStatusEnum.getMsgByKey(searchResult);
+            return IMoocJSONResult.errorMsg(errormsg);
+        }
+
+    }
+
+    @PostMapping("/addFriendRequest")
+    public IMoocJSONResult addFriendRequest(String myUserId, String friendUsername) throws Exception {
+
+        // 判空
+        if (StringUtils.isBlank(myUserId) || StringUtils.isBlank(friendUsername)){
+            return IMoocJSONResult.errorMsg("");
+        }
+
+        // 1 搜索的用户不存在，"返回无此用户"
+        // 2 搜索的是自己，返回"不能添加自己"
+        // 3 搜索的已经是自己的好友，返回"该用户已经是你的好友"
+        Integer searchResult = userService.preconditionSearchFriends(myUserId,friendUsername);
+
+        if (searchResult == SearchFriendsStatusEnum.SUCCESS.status){
+
+            userService.sendFriendRequest(myUserId, friendUsername);
+
+        } else {
+            String errormsg = SearchFriendsStatusEnum.getMsgByKey(searchResult);
+            return IMoocJSONResult.errorMsg(errormsg);
+        }
+
+        return IMoocJSONResult.ok();
 
     }
 

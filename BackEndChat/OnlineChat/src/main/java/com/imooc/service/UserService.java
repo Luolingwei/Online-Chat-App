@@ -16,5 +16,12 @@ public interface UserService {
     // 更新用户信息到数据库
     public Users updateUserInfo(Users user);
 
+    // 搜索朋友的前置条件
+    public Integer preconditionSearchFriends(String myUserId, String friendUsername);
 
+    // 根据用户名查询用户对象
+    public Users querUserInfobyName(String username);
+
+    // 添加好友请求的记录到数据库
+    public void sendFriendRequest(String myUserId, String friendUsername);
 }
