@@ -45,9 +45,22 @@ window.app = {
 	// 登出后移除用户全局对象
 	userLogout: function(){
 		plus.storage.removeItem("userInfo");
+	},
+	
+	// 保存当前用户的所有联系人列表
+	setContactList: function(contactList){
+		var contactListStr = JSON.stringify(contactList);
+		plus.storage.setItem("contactList",contactListStr);
+	},
+	
+	// 获取当前用户的所有联系人列表
+	getContactList: function(){
+		var contactListStr = plus.storage.getItem("contactList");
+		if (!this.isNotNull(contactListStr)){
+			return [];
+		}
+		return JSON.parse(contactListStr);
 	}
-	
-	
 	
 	
 }

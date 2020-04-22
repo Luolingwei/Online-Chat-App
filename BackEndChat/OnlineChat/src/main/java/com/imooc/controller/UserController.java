@@ -1,8 +1,10 @@
 package com.imooc.controller;
 
+import com.imooc.enums.OperatorFriendRequestTypeEnum;
 import com.imooc.enums.SearchFriendsStatusEnum;
 import com.imooc.pojo.Users;
 import com.imooc.pojo.bo.UsersBO;
+import com.imooc.pojo.vo.MyFriendsVO;
 import com.imooc.pojo.vo.UsersVO;
 import com.imooc.service.UserService;
 import com.imooc.utils.FileUtils;
@@ -14,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
+import java.util.List;
 
 @RestController
 @RequestMapping("u")
@@ -153,6 +156,59 @@ public class UserController extends BasicController{
 
         return IMoocJSONResult.ok();
 
+    }
+
+    @PostMapping("/queryFriendRequests")
+    public IMoocJSONResult queryFriendRequests(String userId) throws Exception {
+
+        // 判空
+        if (StringUtils.isBlank(userId) ){
+            return IMoocJSONResult.errorMsg("");
+        }
+
+        // 查询用户接收到的朋友请求
+        return IMoocJSONResult.ok(userService.queryFriendRequestList(userId));
+    }
+
+    // 接收方通过或者忽略朋友请求
+    @PostMapping("/operFriendRequest")
+    public IMoocJSONResult queryFriendRequests(String acceptUserId, String senderUserId, Integer operType) throws Exception {
+
+        // 判空参数
+        if (StringUtils.isBlank(acceptUserId) || StringUtils.isBlank(senderUserId) || operType==null){
+            return IMoocJSONResult.errorMsg("");
+        }
+
+        // 如果operType没有对应的枚举值，抛错
+        if (StringUtils.isBlank(OperatorFriendRequestTypeEnum.getMsgByType(operType))){
+            return IMoocJSONResult.errorMsg("");
+        }
+
+        if (operType.equals(OperatorFriendRequestTypeEnum.IGNORE.type)){
+            // 忽略好友请求，直接删除request记录
+            userService.deleteFriendRequest(acceptUserId,senderUserId);
+        } else if (operType.equals(OperatorFriendRequestTypeEnum.PASS.type)){
+            // 通过好友请求，删除request记录并互相保存好友
+            userService.passFriendRequest(acceptUserId,senderUserId);
+        }
+
+        // 查询当前用户的好友列表 (获取最新的好友列表)
+        List<MyFriendsVO> myFriendsVOList = userService.queryMyFriends(acceptUserId);
+
+        return IMoocJSONResult.ok(myFriendsVOList);
+    }
+
+    // 查询当前用户的好友列表
+    @PostMapping("/queryMyFriends")
+    public IMoocJSONResult queryMyFriends(String userId) throws Exception {
+
+        // 判空
+        if (StringUtils.isBlank(userId) ){
+            return IMoocJSONResult.errorMsg("");
+        }
+
+        // 查询当前用户的好友列表
+        return IMoocJSONResult.ok(userService.queryMyFriends(userId));
     }
 
 }

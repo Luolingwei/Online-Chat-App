@@ -112,10 +112,8 @@
 					mui.openWindow("login.html","login.html");
 					
 				});
-				link_logout
 				
 				window.addEventListener("refresh", function(){
-					console.log("refreshInfo")
 					refreshUserInfo();
 				});
 				
@@ -128,7 +126,6 @@
 
 				
 				if (app.isNotNull(user)){
-					console.log(JSON.stringify(user));
 					
 					var faceImage = user.faceImage;
 					var nickname = user.nickname;

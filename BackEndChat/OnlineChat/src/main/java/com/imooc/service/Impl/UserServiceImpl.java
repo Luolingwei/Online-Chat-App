@@ -4,9 +4,12 @@ import com.imooc.enums.SearchFriendsStatusEnum;
 import com.imooc.mapper.FriendsRequestMapper;
 import com.imooc.mapper.MyFriendsMapper;
 import com.imooc.mapper.UsersMapper;
+import com.imooc.mapper.UsersMapperCustom;
 import com.imooc.pojo.FriendsRequest;
 import com.imooc.pojo.MyFriends;
 import com.imooc.pojo.Users;
+import com.imooc.pojo.vo.FriendRequestVO;
+import com.imooc.pojo.vo.MyFriendsVO;
 import com.imooc.service.UserService;
 import com.imooc.utils.QRCodeUtils;
 import net.sf.jsqlparser.expression.DateTimeLiteralExpression;
@@ -20,6 +23,7 @@ import tk.mybatis.mapper.entity.Example.Criteria;
 
 import java.io.File;
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -28,6 +32,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UsersMapper usersMapper;
+
+    @Autowired
+    private UsersMapperCustom usersMapperCustom;
 
     @Autowired
     private MyFriendsMapper myFriendsMapper;
@@ -171,4 +178,55 @@ public class UserServiceImpl implements UserService {
         }
 
     }
+
+    @Transactional(propagation = Propagation.SUPPORTS)
+    @Override
+    public List<FriendRequestVO> queryFriendRequestList(String acceptUserId) {
+
+        return usersMapperCustom.queryFriendRequestList(acceptUserId);
+
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    @Override
+    // 忽略好友请求
+    public void deleteFriendRequest(String acceptUserId, String senderUserId) {
+
+        Example example = new Example(FriendsRequest.class);
+        Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("sendUserId",senderUserId);
+        criteria.andEqualTo("acceptUserId",acceptUserId);
+        friendsRequestMapper.deleteByExample(example);
+
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    @Override
+    // 通过好友请求
+    public void passFriendRequest(String acceptUserId, String senderUserId) {
+
+        saveFriends(acceptUserId,senderUserId);
+        saveFriends(senderUserId,acceptUserId);
+        deleteFriendRequest(acceptUserId,senderUserId);
+
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    private void saveFriends(String acceptUserId, String senderUserId){
+
+        MyFriends myFriends = new MyFriends();
+        myFriends.setId(sid.nextShort());
+        myFriends.setMyUserId(acceptUserId);
+        myFriends.setMyFriendUserId(senderUserId);
+        myFriendsMapper.insert(myFriends);
+
+    }
+
+    @Transactional(propagation = Propagation.SUPPORTS)
+    @Override
+    public List<MyFriendsVO> queryMyFriends(String userId) {
+        return usersMapperCustom.queryMyFriends(userId);
+    }
+
+
 }

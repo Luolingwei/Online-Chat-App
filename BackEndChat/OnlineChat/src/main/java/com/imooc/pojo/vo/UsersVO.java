@@ -1,18 +1,14 @@
 package com.imooc.pojo.vo;
 
-import javax.persistence.Column;
-import javax.persistence.Id;
 
 public class UsersVO {
-    @Id
+
     private String id;
 
     private String username;
 
-    @Column(name = "face_image")
     private String faceImage;
 
-    @Column(name = "face_image_big")
     private String faceImageBig;
 
     private String nickname;

@@ -105,9 +105,19 @@
 				
 			})
 			
+			// 延时加载
+			setTimeout("initData()","1000");
+			
 		
+		});
 		
-		})
+		// 预加载刷新各个页面的数据
+		function initData(){
+			var chalist = plus.webview.getWebviewById("chats.html");
+			mui.fire(chalist,"refresh");
+			var me = plus.webview.getWebviewById("me.html");
+			mui.fire(me,"refresh");
+		}
 		
 		
 	</script>

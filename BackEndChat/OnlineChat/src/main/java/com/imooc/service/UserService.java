@@ -1,6 +1,10 @@
 package com.imooc.service;
 
 import com.imooc.pojo.Users;
+import com.imooc.pojo.vo.FriendRequestVO;
+import com.imooc.pojo.vo.MyFriendsVO;
+
+import java.util.List;
 
 public interface UserService {
 
@@ -24,4 +28,23 @@ public interface UserService {
 
     // 添加好友请求的记录到数据库
     public void sendFriendRequest(String myUserId, String friendUsername);
+
+    // 根据用户id查询其受到的好友请求
+    public List<FriendRequestVO> queryFriendRequestList(String acceptUserId);
+
+    // 删除好友请求记录
+    public void deleteFriendRequest(String acceptUserId, String senderUserId);
+
+    /**
+     * 通过好友请求
+     * 1 保存好友
+     * 2 逆向保存好友
+     * 3 删除request记录
+     */
+    // 通过好友请求记录
+    public void passFriendRequest(String acceptUserId, String senderUserId);
+
+    // 查询用户的好友列表
+    public List<MyFriendsVO> queryMyFriends(String userId);
+
 }
