@@ -20,7 +20,9 @@
 <body>
 	
 	<header class="mui-bar mui-bar-nav title">
-		<h1 class="mui-title title-color"><b>InstaChat</b></h1>
+		<h1 class="mui-title title-color" id="InstaChat_title">
+			<b>InstaChat</b>
+		</h1>
 	</header>
 	
 	<nav class="mui-bar mui-bar-tab">
@@ -74,6 +76,10 @@
 				return false;
 			}
 			
+			// 对网络环境进行监听
+			netChangeSwitch();
+			
+			
 			// 获取当前的webview对象
 			var indexWebview = plus.webview.currentWebview();
 			
@@ -110,6 +116,25 @@
 			
 		
 		});
+		
+		// 监听网络状态变化
+		function netChangeSwitch(){
+			document.addEventListener("netchange", function(){
+				// 获取并判断网络状态
+				var connectionStatus = plus.networkinfo.getCurrentType();
+				
+				if (connectionStatus !=0 && connectionStatus !=1){
+					// 网络畅通
+					InstaChat_title = document.getElementById("InstaChat_title");
+					InstaChat_title.innerHTML = "<b>InstaChat</b>";
+					
+				} else {
+					// 网络不通
+					InstaChat_title = document.getElementById("InstaChat_title");
+					InstaChat_title.innerHTML = "<b>InstaChat(No Connection...)</b>";
+				}
+			});
+		}
 		
 		// 预加载刷新各个页面的数据
 		function initData(){

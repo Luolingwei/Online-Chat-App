@@ -13,4 +13,6 @@ public interface UsersMapperCustom extends MyMapper<Users> {
 
     public List<MyFriendsVO> queryMyFriends(String userId);
 
+    public void updateMsgSigned (List<String> msgIdList);
+
 }

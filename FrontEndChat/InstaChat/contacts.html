@@ -161,7 +161,7 @@
 						var groupLabel = enWords[i];
 						contactHtml += '<li data-group="' + groupLabel + '" class="mui-table-view-divider mui-indexed-list-group">' + groupLabel +'</li>';
 						for (var j=0; j<group.length; j++){
-							contactHtml+='<li friendUserId = "'+ group[j].friendUserId + 'friendNickname = "'+ group[j].friendNickname + 'friendFaceImage = "'+ group[j].friendFaceImage + '" class="mui-media mui-memui-table-view-cell mui-indexed-list-item" style="padding: 8px 10px;">' +
+							contactHtml+='<li friendUserId = "'+ group[j].friendUserId + '" friendNickname = "'+ group[j].friendNickname + '" friendFaceImage = "'+ group[j].friendFaceImage + '" class="chat-with-friend mui-media mui-memui-table-view-cell mui-indexed-list-item" style="padding: 8px 10px;">' +
 											'<img class="mui-media-object mui-pull-left" style = "max-width: 35px; height: 35px;" src = "' + app.imgServerUrl + group[j].friendFaceImage +'"/>' +
 											'<div class="mui-media-body" style="line-height: 35px;">'+ group[j].friendNickname +'</div>' +
 										  '</li>';
@@ -174,8 +174,39 @@
 				
 				// 渲染Html
 				document.getElementById("contactList").innerHTML = contactHtml;
+				
 				// 清空数组
 				clearContactArray();
+				
+				// 为好友通讯录批量绑定点击事件
+				
+
+				mui("#contactList").on("tap",".chat-with-friend", function(e){
+					
+					var friendUserId = this.getAttribute("friendUserId");
+					var friendNickname = this.getAttribute("friendNickname");
+					var friendFaceImage = this.getAttribute("friendFaceImage");
+					
+					// console.log("-----------------")
+					// console.log(friendUserId);
+					// console.log(friendNickname);
+					// console.log(friendFaceImage);
+					// console.log("-----------------")
+					
+					// 打开聊天子页面
+					mui.openWindow({
+						url: "chatting.html",
+						id: "chatting-" + friendUserId, // 唯一标识每个朋友的聊天页面
+						extras:{
+							friendUserId: friendUserId,
+							friendNickname: friendNickname,
+							friendFaceImage: friendFaceImage,
+						}
+					});
+					
+				})
+
+					
 				
 			}
 			

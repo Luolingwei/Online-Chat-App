@@ -1,5 +1,6 @@
 package com.imooc.service;
 
+import com.imooc.netty.ChatMsg;
 import com.imooc.pojo.Users;
 import com.imooc.pojo.vo.FriendRequestVO;
 import com.imooc.pojo.vo.MyFriendsVO;
@@ -46,5 +47,12 @@ public interface UserService {
 
     // 查询用户的好友列表
     public List<MyFriendsVO> queryMyFriends(String userId);
+
+    // 保存聊天消息到数据库
+    public String saveMsg(ChatMsg chatMsg);
+
+    // 批量更新消息签收状态
+    public void updateMsgSigned (List<String> msgIdList);
+
 
 }

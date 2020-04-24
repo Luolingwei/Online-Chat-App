@@ -1,10 +1,9 @@
 package com.imooc.service.Impl;
 
+import com.imooc.enums.MsgSignFlagEnum;
 import com.imooc.enums.SearchFriendsStatusEnum;
-import com.imooc.mapper.FriendsRequestMapper;
-import com.imooc.mapper.MyFriendsMapper;
-import com.imooc.mapper.UsersMapper;
-import com.imooc.mapper.UsersMapperCustom;
+import com.imooc.mapper.*;
+import com.imooc.netty.ChatMsg;
 import com.imooc.pojo.FriendsRequest;
 import com.imooc.pojo.MyFriends;
 import com.imooc.pojo.Users;
@@ -41,6 +40,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private FriendsRequestMapper friendsRequestMapper;
+
+    @Autowired
+    private ChatMsgMapper chatMsgMapper;
 
     @Autowired
     private Sid sid;
@@ -226,6 +228,31 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<MyFriendsVO> queryMyFriends(String userId) {
         return usersMapperCustom.queryMyFriends(userId);
+    }
+
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    @Override
+    public String saveMsg(ChatMsg chatMsg) {
+
+        String msgId = sid.nextShort();
+        com.imooc.pojo.ChatMsg msgDB = new com.imooc.pojo.ChatMsg();
+        msgDB.setId(msgId);
+        msgDB.setAcceptUserId(chatMsg.getReceiverId());
+        msgDB.setSendUserId(chatMsg.getSenderId());
+        msgDB.setCreateTime(new Date());
+        msgDB.setSignFlag(MsgSignFlagEnum.unsign.type);
+        msgDB.setMsg(chatMsg.getMsg());
+        chatMsgMapper.insert(msgDB);
+        return msgId;
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    @Override
+    public void updateMsgSigned(List<String> msgIdList) {
+
+        usersMapperCustom.updateMsgSigned(msgIdList);
+
     }
 
 
