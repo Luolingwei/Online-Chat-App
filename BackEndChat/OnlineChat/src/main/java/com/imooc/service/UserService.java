@@ -54,5 +54,7 @@ public interface UserService {
     // 批量更新消息签收状态
     public void updateMsgSigned (List<String> msgIdList);
 
+    // 查询用户未签收的消息列表
+    public List<com.imooc.pojo.ChatMsg> getUnReadMsgList(String acceptUserId);
 
 }

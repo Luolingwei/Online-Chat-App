@@ -2,6 +2,7 @@ package com.imooc.controller;
 
 import com.imooc.enums.OperatorFriendRequestTypeEnum;
 import com.imooc.enums.SearchFriendsStatusEnum;
+import com.imooc.pojo.ChatMsg;
 import com.imooc.pojo.Users;
 import com.imooc.pojo.bo.UsersBO;
 import com.imooc.pojo.vo.MyFriendsVO;
@@ -209,6 +210,21 @@ public class UserController extends BasicController{
 
         // 查询当前用户的好友列表
         return IMoocJSONResult.ok(userService.queryMyFriends(userId));
+    }
+
+    // 用户手机端获取未签收的消息列表 (用户离线,没有channel, 没有在onmsg中获取)
+    @PostMapping("/getUnReadMsgList")
+    public IMoocJSONResult getUnReadMsgList(String acceptUserId) throws Exception {
+
+        // 判空
+        if (StringUtils.isBlank(acceptUserId) ){
+            return IMoocJSONResult.errorMsg("");
+        }
+
+        // 获取未读消息列表
+        List<ChatMsg> unReadMagList = userService.getUnReadMsgList(acceptUserId);
+
+        return IMoocJSONResult.ok(unReadMagList);
     }
 
 }

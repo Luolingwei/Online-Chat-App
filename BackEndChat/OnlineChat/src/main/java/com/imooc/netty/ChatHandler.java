@@ -25,7 +25,7 @@ import java.util.List;
 public class ChatHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> {
 
     // 用于记录和管理所有客户端的channel
-    private static ChannelGroup users = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
+    public static ChannelGroup users = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
@@ -33,6 +33,7 @@ public class ChatHandler extends SimpleChannelInboundHandler<TextWebSocketFrame>
          * 客户端打开链接之后，获取客户端的channel并放到channelGroup中进行管理
          */
         users.add(ctx.channel());
+        System.out.println("客户端建立连接，channel对应的长id为: " + ctx.channel().id().asLongText());
     }
 
     @Override
@@ -42,7 +43,6 @@ public class ChatHandler extends SimpleChannelInboundHandler<TextWebSocketFrame>
          */
         users.remove(ctx.channel());
         System.out.println("客户端断开，channel对应的长id为: " + ctx.channel().id().asLongText());
-        System.out.println("客户端断开，channel对应的短id为: " + ctx.channel().id().asShortText());
     }
 
     @Override
@@ -71,11 +71,11 @@ public class ChatHandler extends SimpleChannelInboundHandler<TextWebSocketFrame>
             String senderId = dataContent.getChatMsg().getSenderId();
             UserChannelRel.put(senderId,curChannel);
 
-            // 测试
-            for (Channel channel: users){
-                System.out.println(channel.id().asLongText());
-            }
-            UserChannelRel.output();
+//            // 测试
+//            for (Channel channel: users){
+//                System.out.println(channel.id().asLongText());
+//            }
+//            UserChannelRel.output();
 
 
         } else if (action == MsgActionEnum.CHAT.type) {
@@ -90,6 +90,9 @@ public class ChatHandler extends SimpleChannelInboundHandler<TextWebSocketFrame>
             String msgId = userService.saveMsg(chatMsg);
             chatMsg.setMsgId(msgId);
 
+            DataContent dataContentMsg = new DataContent();
+            dataContentMsg.setChatMsg(chatMsg);
+
             // 发送消息
             // 从全局用户channel关系中获取接收方的channel
             Channel receiverCahnnel = UserChannelRel.get(receiverId);
@@ -101,8 +104,11 @@ public class ChatHandler extends SimpleChannelInboundHandler<TextWebSocketFrame>
                 Channel findChannel = users.find(receiverCahnnel.id());
                 if (findChannel!=null){
                     // 用户在线
+                    /**
+                     * 通过这个receiverCahnnel.writeAndFlush把消息推送给相应的用户，用户通过id和channel绑定
+                     */
                     receiverCahnnel.writeAndFlush(
-                            new TextWebSocketFrame(JsonUtils.objectToJson(chatMsg)));
+                            new TextWebSocketFrame(JsonUtils.objectToJson(dataContentMsg)));
                 } else {
                     // 用户离线
                     // TODO 推送消息
@@ -125,8 +131,8 @@ public class ChatHandler extends SimpleChannelInboundHandler<TextWebSocketFrame>
                 }
             }
 
-            // 非空的msgId序列
-            System.out.println(msgIdList.toString());
+//            // 非空的msgId序列
+//            System.out.println(msgIdList.toString());
 
             if (msgIdList != null && !msgIdList.isEmpty() && msgIdList.size()>0){
                 // 批量签收消息

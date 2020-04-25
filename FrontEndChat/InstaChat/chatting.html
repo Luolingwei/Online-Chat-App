@@ -31,7 +31,7 @@
 		<div id="msg-outter" class="mui-content">
 			<div id='msg'>
 				
-				<div class="friend_lists">
+<!-- 				<div class="friend_lists">
 					<div class="header_img">
 						<img src="image/face-default-cat.png" width="40px" height="40px" />
 					</div>
@@ -47,97 +47,7 @@
 					<div class="msg-wrapper left">
 						<p class="msg-right-green">好的，没问题！时间地点？</p>
 					</div>
-				</div>
-				
-				<div class="friend_lists">
-					<div class="header_img">
-						<img src="image/face-default-cat.png" width="40px" height="40px" />
-					</div>
-					<div class="msg-wrapper right">
-						<p class="msg-left-white">哈哈哈</p>
-					</div>
-				</div>
-				
-				<div class="me_lists">
-					<div class="header_img">
-						<img src="image/face-default-cat.png" width="40px" height="40px" />
-					</div>
-					<div class="msg-wrapper left">
-						<p class="msg-right-green">可以可以？</p>
-					</div>
-				</div>
-
-				<div class="friend_lists">
-					<div class="header_img">
-						<img src="image/face-default-cat.png" width="40px" height="40px" />
-					</div>
-					<div class="msg-wrapper right">
-						<p class="msg-left-white">哈哈哈</p>
-					</div>
-				</div>
-				
-				<div class="me_lists">
-					<div class="header_img">
-						<img src="image/face-default-cat.png" width="40px" height="40px" />
-					</div>
-					<div class="msg-wrapper left">
-						<p class="msg-right-green">可以可以？</p>
-					</div>
-				</div>
-				
-				<div class="friend_lists">
-					<div class="header_img">
-						<img src="image/face-default-cat.png" width="40px" height="40px" />
-					</div>
-					<div class="msg-wrapper right">
-						<p class="msg-left-white">哈哈哈</p>
-					</div>
-				</div>
-				
-				<div class="me_lists">
-					<div class="header_img">
-						<img src="image/face-default-cat.png" width="40px" height="40px" />
-					</div>
-					<div class="msg-wrapper left">
-						<p class="msg-right-green">可以可以？</p>
-					</div>
-				</div>
-				
-				<div class="friend_lists">
-					<div class="header_img">
-						<img src="image/face-default-cat.png" width="40px" height="40px" />
-					</div>
-					<div class="msg-wrapper right">
-						<p class="msg-left-white">哈哈哈</p>
-					</div>
-				</div>
-				
-				<div class="me_lists">
-					<div class="header_img">
-						<img src="image/face-default-cat.png" width="40px" height="40px" />
-					</div>
-					<div class="msg-wrapper left">
-						<p class="msg-right-green">可以可以？</p>
-					</div>
-				</div>
-				
-				<div class="friend_lists">
-					<div class="header_img">
-						<img src="image/face-default-cat.png" width="40px" height="40px" />
-					</div>
-					<div class="msg-wrapper right">
-						<p class="msg-left-white">哈哈哈</p>
-					</div>
-				</div>
-				
-				<div class="me_lists">
-					<div class="header_img">
-						<img src="image/face-default-cat.png" width="40px" height="40px" />
-					</div>
-					<div class="msg-wrapper left">
-						<p class="msg-right-green">可以可以？</p>
-					</div>
-				</div>
+				</div> -->
 				
 			</div>
 		</div>
@@ -183,6 +93,9 @@
 					
 					// 标题改为朋友的昵称
 					document.getElementById("chatting-nickname").innerHTML = friendNickname;
+					
+					// 渲染初始化的聊天记录
+					initChatHistory();
 					
 					// 设置聊天记录进入页面的时候自动滚动到最后一条
 					var areaMsgList = document.getElementById("msg");
@@ -233,12 +146,22 @@
 						msg_text.value = "";
 						send.setAttribute("class", "mui-btn-gray");
 						
+						// 构建ChatMsg对象
+						var chatMsg = new app.ChatMsg(me.id,friendUserId,msg_text_val,null);
+						
+						// 构建DataContent对象
+						var dataContent = new app.DataContent(app.CHAT, chatMsg, null);
+						
+						// 保存自己发的聊天记录到本地缓存
+						app.saveUserChatHistory(me.id,friendUserId,msg_text_val,1);
+						// 保存快照记录到本地缓存
+						app.saveUserChatSnapshot(me.id,friendUserId,msg_text_val,true)
+						
 						// 调用websocket发送消息到netty后端
 						// 调用chats.html中的socket方法发送消息(跨页面调用)
 						var wsWebview = plus.webview.getWebviewById("chats.html");
-						wsWebview.evalJS("CHAT.chat('" + msg_text_val + "')");
-						
-						
+						wsWebview.evalJS("CHAT.chat('" + JSON.stringify(dataContent) + "')");
+						// wsWebview.evalJS("CHAT.chat('" + msg_text_val + "')");
 						
 						// 测试接收数据
 						// receiveMsg(msg_text_val);

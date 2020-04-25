@@ -1,16 +1,22 @@
 package com.imooc.service.Impl;
 
+import com.imooc.enums.MsgActionEnum;
 import com.imooc.enums.MsgSignFlagEnum;
 import com.imooc.enums.SearchFriendsStatusEnum;
 import com.imooc.mapper.*;
 import com.imooc.netty.ChatMsg;
+import com.imooc.netty.DataContent;
+import com.imooc.netty.UserChannelRel;
 import com.imooc.pojo.FriendsRequest;
 import com.imooc.pojo.MyFriends;
 import com.imooc.pojo.Users;
 import com.imooc.pojo.vo.FriendRequestVO;
 import com.imooc.pojo.vo.MyFriendsVO;
 import com.imooc.service.UserService;
+import com.imooc.utils.JsonUtils;
 import com.imooc.utils.QRCodeUtils;
+import io.netty.channel.Channel;
+import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import net.sf.jsqlparser.expression.DateTimeLiteralExpression;
 import org.n3r.idworker.Sid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -211,6 +217,16 @@ public class UserServiceImpl implements UserService {
         saveFriends(senderUserId,acceptUserId);
         deleteFriendRequest(acceptUserId,senderUserId);
 
+        // 通过好友请求后，服务器通过websocket主动推送消息到请求发起者, 更新他的通讯录列表为最新
+        Channel sendChannel = UserChannelRel.get(senderUserId);
+        if (sendChannel!=null){
+            DataContent dataContent = new DataContent();
+            dataContent.setAction(MsgActionEnum.PULL_FRIEND.type);
+            sendChannel.writeAndFlush(
+                    new TextWebSocketFrame(JsonUtils.objectToJson(dataContent)));
+        }
+
+
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
@@ -252,6 +268,18 @@ public class UserServiceImpl implements UserService {
     public void updateMsgSigned(List<String> msgIdList) {
 
         usersMapperCustom.updateMsgSigned(msgIdList);
+
+    }
+
+    @Transactional(propagation = Propagation.SUPPORTS)
+    @Override
+    public List<com.imooc.pojo.ChatMsg> getUnReadMsgList(String acceptUserId) {
+
+        Example example = new Example(com.imooc.pojo.ChatMsg.class);
+        Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("acceptUserId",acceptUserId);
+        criteria.andEqualTo("signFlag",0);
+        return chatMsgMapper.selectByExample(example);
 
     }
 
