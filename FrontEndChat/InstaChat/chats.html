@@ -209,7 +209,8 @@
 					// 每次连接之后(用户上线), 获取用户的未签收消息
 					fetchUnReadMsg();
 					
-					
+					// 定时发送心跳包
+					setInterval("CHAT.keepalive()", 10000);
 					
 				},
 				
@@ -231,6 +232,21 @@
 					CHAT.chat(JSON.stringify(dataContent));
 				},
 				
+				// 保持前端心跳, 向后端发送心跳包
+				keepalive: function(){
+					
+					var dataContent = new app.DataContent(app.KEEPALIVE, null, null);
+					
+					// 向后端发送心跳包
+					CHAT.chat(JSON.stringify(dataContent));
+					
+					// 定时拉取未读消息
+					fetchUnReadMsg();
+					
+					// 定时获取通讯录列表并保存到缓存
+					fetchContactList();
+					
+				},
 				
 				wsmsg: function(e){
 					
@@ -483,12 +499,12 @@
 					        '<a href="javascript:;">' +
 					            '<img class="mui-media-object mui-pull-left" src="' + app.imgServerUrl + friend.sendFaceImage + '">' +
 					            '<span id="span_nickname" class="mui-pull-right">' +
-					            	'<button friendId="' + friend.sendUserId + '" type="button" class="ignoreRequest mui-btn mui-btn-grey" style="padding: 4px 10px;margin-right:5px;">忽略</button>' +
-					            	'<button friendId="' + friend.sendUserId + '" type="button" class="passRequest mui-btn mui-btn-danger" style="padding: 4px 10px;">通过</button>' +
+					            	'<button friendId="' + friend.sendUserId + '" type="button" class="ignoreRequest mui-btn mui-btn-grey" style="padding: 4px 10px;margin-right:5px;">Ignore</button>' +
+					            	'<button friendId="' + friend.sendUserId + '" type="button" class="passRequest mui-btn mui-btn-danger" style="padding: 4px 10px;">Accept</button>' +
 					            '</span>' +
 					            '<div class="mui-media-body">' +
 					               '<label>' + friend.sendNickname + '</label>' +
-					                '<p class="mui-ellipsis">请求添加你为朋友</p>' +
+					                '<p class="mui-ellipsis">want to add you as friend</p>' +
 					            '</div>' +
 					        '</a>' +
 						'</li>';
