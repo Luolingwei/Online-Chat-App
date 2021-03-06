@@ -23,6 +23,9 @@ public class Users {
 
     private String cid;
 
+    @Column(name = "public_key")
+    private String publicKey;
+
     /**
      * @return id
      */
@@ -134,4 +137,14 @@ public class Users {
     public void setCid(String cid) {
         this.cid = cid;
     }
+
+
+    public String getPublicKey() {
+        return publicKey;
+    }
+
+    public void setPublicKey(String publicKey) {
+        this.publicKey = publicKey;
+    }
+
 }

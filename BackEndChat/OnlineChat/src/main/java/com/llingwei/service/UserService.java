@@ -5,6 +5,8 @@ import com.llingwei.pojo.Users;
 import com.llingwei.pojo.vo.FriendRequestVO;
 import com.llingwei.pojo.vo.MyFriendsVO;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.List;
 
 public interface UserService {
@@ -49,12 +51,14 @@ public interface UserService {
     public List<MyFriendsVO> queryMyFriends(String userId);
 
     // 保存聊天消息到数据库
-    public String saveMsg(ChatMsg chatMsg);
+    public String saveMsg(ChatMsg chatMsg) throws NoSuchAlgorithmException, InvalidKeySpecException;
 
     // 批量更新消息签收状态
     public void updateMsgSigned (List<String> msgIdList);
 
     // 查询用户未签收的消息列表
-    public List<com.llingwei.pojo.ChatMsg> getUnReadMsgList(String acceptUserId);
+    public List<com.llingwei.pojo.ChatMsg> getUnReadMsgList(String acceptUserId) throws NoSuchAlgorithmException, InvalidKeySpecException;
 
+    // 根据id查询用户的public key
+    public String searchPublicKey (String userId);
 }

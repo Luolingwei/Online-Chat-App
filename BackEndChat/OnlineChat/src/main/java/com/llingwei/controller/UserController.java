@@ -44,9 +44,20 @@ public class UserController extends BasicController{
             if (userResult == null){
                 return IMoocJSONResult.errorMsg("用户名或密码不正确...");
             }
+            userResult = userService.querUserInfobyName(user.getUsername());
+            userResult.setPublicKey(user.getPublicKey());
+            userService.updateUserInfo(userResult);
 
         } else {
             // 1.2 注册
+//            RSAController crypto = new RSAController();
+//            KeyPair keyPair = crypto.generateKey();
+//            PublicKey publicKey = keyPair.getPublic();
+//            PrivateKey privateKey = keyPair.getPrivate();
+//
+//            String pubKeyBase64 = Base64.getEncoder().encodeToString(publicKey.getEncoded());
+//            String priKeyBase64 = Base64.getEncoder().encodeToString(privateKey.getEncoded());
+
             user.setNickname(user.getUsername());
             user.setFaceImage("");
             user.setFaceImageBig("");
@@ -225,6 +236,21 @@ public class UserController extends BasicController{
         List<ChatMsg> unReadMagList = userService.getUnReadMsgList(acceptUserId);
 
         return IMoocJSONResult.ok(unReadMagList);
+    }
+
+    // 根据userId获取用户的publicKey
+    @PostMapping("/getUserPublicKey")
+    public IMoocJSONResult getUserPublicKey(String userId) throws Exception {
+
+        // 判空
+        if (StringUtils.isBlank(userId) ){
+            return IMoocJSONResult.errorMsg("");
+        }
+
+        // 获取未读消息列表
+        String publicKey = userService.searchPublicKey(userId);
+
+        return IMoocJSONResult.ok(publicKey);
     }
 
 }

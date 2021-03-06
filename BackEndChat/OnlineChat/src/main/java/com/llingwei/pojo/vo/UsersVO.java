@@ -15,6 +15,10 @@ public class UsersVO {
 
     private String qrcode;
 
+    private String publicKey;
+
+    private String privateKey;
+
     public String getId() {
         return id;
     }
@@ -61,5 +65,21 @@ public class UsersVO {
 
     public void setQrcode(String qrcode) {
         this.qrcode = qrcode;
+    }
+
+    public String getPublicKey() {
+        return publicKey;
+    }
+
+    public void setPublicKey(String publicKey) {
+        this.publicKey = publicKey;
+    }
+
+    public String getPrivateKey() {
+        return privateKey;
+    }
+
+    public void setPrivateKey(String privateKey) {
+        this.privateKey = privateKey;
     }
 }

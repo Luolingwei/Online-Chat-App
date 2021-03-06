@@ -282,5 +282,14 @@ public class UserServiceImpl implements UserService {
 
     }
 
+    @Transactional(propagation = Propagation.SUPPORTS)
+    @Override
+    public String searchPublicKey(String userId) {
+
+        Users user = queryUserById(userId);
+        return user.getPublicKey();
+
+    }
+
 
 }
