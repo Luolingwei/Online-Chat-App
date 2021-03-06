@@ -57,12 +57,13 @@
 				<textarea id='msg-text' type="text" class='input-text'></textarea>
 			</div>
 			<label for="" class="footer-right">
-				<button type="button" class="mui-btn mui-btn-gray" id="send">发送</button>
+				<button type="button" class="mui-btn mui-btn-gray" id="send">Send</button>
 			</label>
 		</footer>
 		
 		<script src="js/mui.min.js"></script>
 		<script type="application/javascript" src="js/app.js"></script>
+		<script src="encrypt/cryptico.js"></script>
 		<script type="text/javascript">
 			// 创建命名空间，只需要把自己的代码，写进入，那么外部就无法访问
 			// (function($, doc){
@@ -140,32 +141,52 @@
 							return;
 						}
 						
-						// 发送消息，追加消息的html到msgList中
-						sendMsg(app.imgServerUrl + me.faceImage, msg_text_val);
-						// 发送消息完毕, 清空消息文本框中的内容, 改按钮颜色
-						msg_text.value = "";
-						send.setAttribute("class", "mui-btn-gray");
-						
-						// 构建ChatMsg对象
-						var chatMsg = new app.ChatMsg(me.id,friendUserId,msg_text_val,null);
-						
-						// 构建DataContent对象
-						var dataContent = new app.DataContent(app.CHAT, chatMsg, null);
-						
-						// 保存自己发的聊天记录到本地缓存
-						app.saveUserChatHistory(me.id,friendUserId,msg_text_val,1);
-						// 保存快照记录到本地缓存
-						app.saveUserChatSnapshot(me.id,friendUserId,msg_text_val,true)
-						
-						// 调用websocket发送消息到netty后端
-						// 调用chats.html中的socket方法发送消息(跨页面调用)
-						var wsWebview = plus.webview.getWebviewById("chats.html");
-						wsWebview.evalJS("CHAT.chat('" + JSON.stringify(dataContent) + "')");
-						// wsWebview.evalJS("CHAT.chat('" + msg_text_val + "')");
-						
-						// 测试接收数据
-						// receiveMsg(msg_text_val);
-						
+
+						// 获取friendUserId的publicKey
+						mui.ajax(app.serverUrl + "/u/getUserPublicKey?userId=" + friendUserId,{
+							data:{},
+							dataType:'json',//服务器返回json格式数据
+							type:'post',//HTTP请求类型
+							timeout:10000,//超时时间设置为10秒；
+							headers:{'Content-Type':'application/json'},	              
+							success:function(data){
+								if (data.status == 200){
+									// public key 获取成功, 发送消息
+									var friendPublicKey = data.data;
+									console.log("public key obtained: " + friendPublicKey);
+									// 发送消息，追加消息的html到msgList中
+									var encryptedMsg = sendMsg(app.imgServerUrl + me.faceImage, msg_text_val, friendPublicKey);
+									console.log("encryptedMsg: " + encryptedMsg);
+									
+									// 发送消息完毕, 清空消息文本框中的内容, 改按钮颜色
+									msg_text.value = "";
+									send.setAttribute("class", "mui-btn-gray");
+									
+									// 构建ChatMsg对象
+									var chatMsg = new app.ChatMsg(me.id,friendUserId,encryptedMsg,null);
+									
+									// 构建DataContent对象
+									var dataContent = new app.DataContent(app.CHAT, chatMsg, null);
+									
+									// 保存自己发的聊天记录到本地缓存
+									app.saveUserChatHistory(me.id,friendUserId,msg_text_val,1);
+									// 保存快照记录到本地缓存
+									app.saveUserChatSnapshot(me.id,friendUserId,msg_text_val,true)
+									
+									// 调用websocket发送消息到netty后端
+									// 调用chats.html中的socket方法发送消息(跨页面调用)
+									var wsWebview = plus.webview.getWebviewById("chats.html");
+									wsWebview.evalJS("CHAT.chat('" + JSON.stringify(dataContent) + "')");
+									console.log("Msg sent: " + JSON.stringify(dataContent));
+									// wsWebview.evalJS("CHAT.chat('" + msg_text_val + "')");
+									
+									// 测试接收数据
+									// receiveMsg(msg_text_val);
+
+								}
+							}
+						});
+
 					});
 					
 
@@ -174,12 +195,22 @@
 				// 接受消息
 				function receiveMsg(msg) {
 					
+					
+					// 用接收方private key对消息进行解密
+					var me = app.getUserGlobalInfo();
+					
+					var myPrivateKey = deserializeRSAKey(me.privateKey);
+					console.log("my private key is: " + JSON.stringify(myPrivateKey));
+
+					var decryptedResult = cryptico.decrypt(msg, myPrivateKey);
+					console.log("decrypted msg: " + decryptedResult.plaintext);
+					
 					var msgHtml = '<div class="friend_lists">' +
 										'<div class="header_img">' +
 											'<img src="' + app.imgServerUrl + friendFaceImage + '" width="40px" height="40px" />' +
 										'</div>' +
 										'<div class="msg-wrapper right">' +
-											'<p class="msg-left-white">' + msg + '</p>' +
+											'<p class="msg-left-white">' + decryptedResult.plaintext + '</p>' +
 										'</div>' +
 								  '</div>'; 
 					
@@ -190,16 +221,15 @@
 				}
 				
 				// 发送消息
-				function sendMsg(faceImg, msg) {
+				function sendMsg(faceImg, msg, friendPublicKey) {
+							
 					
-					// <div class="me_lists">
-					// 	<div class="header_img">
-					// 		<img src="image/face-default-cat.png" width="40px" height="40px" />
-					// 	</div>
-					// 	<div class="msg-wrapper left">
-					// 		<p class="msg-right-green">可以可以？</p>
-					// 	</div>
-					// </div>
+					// 用接收方public key对消息进行加密发送
+					var encryptedResult = cryptico.encrypt(msg, friendPublicKey);
+
+					// console.log("encryptedResult is: " + encryptedResult.cipher);
+					// var decryptedResult = cryptico.decrypt(encryptedResult.cipher, myPrivateKey);
+					// console.log(decryptedResult.plaintext);
 					
 					var msgHtml = '<div class="me_lists">' +
 									'<div class="header_img">' +
@@ -213,6 +243,7 @@
 					msg_list.insertAdjacentHTML("beforeend", msgHtml);
 					
 					playSendMsgSound();
+					return encryptedResult.cipher;
 				}
 				
 				// 播放发送消息的铃声
@@ -272,6 +303,29 @@
 				}
 				msg_list.innerHTML = togetherHTML;
 			}
+			
+			
+			function serializeRSAKey(key) {
+							return JSON.stringify({
+							  coeff: key.coeff.toString(16),
+							  d: key.d.toString(16),
+							  dmp1: key.dmp1.toString(16),
+							  dmq1: key.dmq1.toString(16),
+							  e: key.e.toString(16),
+							  n: key.n.toString(16),
+							  p: key.p.toString(16),
+							  q: key.q.toString(16)
+							})
+			}
+			
+			function deserializeRSAKey(key) {
+							let json = JSON.parse(key);
+							let rsa = new RSAKey();
+							rsa.setPrivateEx(json.n, json.e, json.d, json.p, json.q, json.dmp1, json.dmq1, json.coeff);
+							return rsa;
+			}
+			
+			
 			
 		</script>
 	</body>

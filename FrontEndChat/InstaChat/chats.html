@@ -67,6 +67,7 @@
 		
 		<script src="js/mui.min.js"></script>
 		<script src="js/app.js"></script>
+		<script src="encrypt/cryptico.js"></script>
 		<script type="text/javascript">
 			mui.init()
 			
@@ -279,6 +280,7 @@
 						isRead = true;
 					}
 					
+
 					// 不管对方有没有在线，只要消息送达，改变消息签收状态
 					
 					// 构建DataContent对象
@@ -288,11 +290,16 @@
 					// 调用chats.html中的socket方法发送消息(同页面调用)
 					CHAT.chat(JSON.stringify(dataContent));
 					
+					
+					// 用接收方private key对消息进行解密
+					var me = app.getUserGlobalInfo();
+					var myPrivateKey = deserializeRSAKey(me.privateKey);
+					
 					// 保存朋友发过来的聊天记录到本地缓存
-					app.saveUserChatHistory(myId,friendUserId,msg,2);
+					app.saveUserChatHistory(myId,friendUserId,cryptico.decrypt(msg,myPrivateKey).plaintext,2);
 					
 					// 保存快照记录到本地缓存
-					app.saveUserChatSnapshot(myId,friendUserId,msg,isRead);
+					app.saveUserChatSnapshot(myId,friendUserId,cryptico.decrypt(msg,myPrivateKey).plaintext,isRead);
 					
 					// 收到消息时，更新快照列表
 					loadingChatSnapshot();
@@ -320,18 +327,27 @@
 							// 2. 保存聊天快照到本地
 							// 3. 对未签收消息批量签收
 							
+							// 用接收方private key对消息进行解密
+							var me = app.getUserGlobalInfo();
+							var myPrivateKey = deserializeRSAKey(me.privateKey);
+							
+							
 							// 构建DataContent对象
 							for (var i=0; i <unReadMagList.length; i++){
 								var msgObj = unReadMagList[i];
+								
+								var decryptedResult = cryptico.decrypt(msgObj.msg, myPrivateKey);
+								console.log("decrypted msg: " + decryptedResult.plaintext);
+								
 								//  逐条保存聊天记录
 								app.saveUserChatHistory(msgObj.acceptUserId,
 														msgObj.sendUserId,
-														msgObj.msg,
+														decryptedResult.plaintext,
 														2);
 								// 存入聊天快照
 								app.saveUserChatSnapshot(msgObj.acceptUserId,
 														msgObj.sendUserId,
-														msgObj.msg,
+														decryptedResult.plaintext,
 														false);
 								
 								// 拼接批量签收的消息id字符串，逗号间隔
@@ -510,6 +526,15 @@
 						'</li>';
 				
 				return html;
+			}
+			
+			
+			
+			function deserializeRSAKey(key) {
+							let json = JSON.parse(key);
+							let rsa = new RSAKey();
+							rsa.setPrivateEx(json.n, json.e, json.d, json.p, json.q, json.dmp1, json.dmq1, json.coeff);
+							return rsa;
 			}
 		</script>
 	</body>

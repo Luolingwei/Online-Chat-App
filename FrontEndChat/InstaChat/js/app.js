@@ -1,5 +1,6 @@
 window.app = {
 	
+	
 	// 后端服务器地址
 	serverUrl: "http://192.168.1.178:8080",
 	
@@ -348,4 +349,7 @@ window.app = {
 		this.msg = msg;
 		this.isRead = isRead;
 	},
+	
+	
+	
 }
