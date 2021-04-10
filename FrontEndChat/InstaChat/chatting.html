@@ -200,32 +200,44 @@
 					var me = app.getUserGlobalInfo();
 					
 					var myPrivateKey = deserializeRSAKey(me.privateKey);
-					console.log("my private key is: " + JSON.stringify(myPrivateKey));
+					// console.log("my private key is: " + JSON.stringify(myPrivateKey));
 
 					var decryptedResult = cryptico.decrypt(msg, myPrivateKey);
 					console.log("decrypted msg: " + decryptedResult.plaintext);
+					console.log("signature status is: " + decryptedResult.signature);
 					
-					var msgHtml = '<div class="friend_lists">' +
-										'<div class="header_img">' +
-											'<img src="' + app.imgServerUrl + friendFaceImage + '" width="40px" height="40px" />' +
-										'</div>' +
-										'<div class="msg-wrapper right">' +
-											'<p class="msg-left-white">' + decryptedResult.plaintext + '</p>' +
-										'</div>' +
-								  '</div>'; 
+					// 只接收 verified 的消息
+					if (decryptedResult.signature == "verified") {
+						var msgHtml = '<div class="friend_lists">' +
+											'<div class="header_img">' +
+												'<img src="' + app.imgServerUrl + friendFaceImage + '" width="40px" height="40px" />' +
+											'</div>' +
+											'<div class="msg-wrapper right">' +
+												'<p class="msg-left-white">' + decryptedResult.plaintext + '</p>' +
+											'</div>' +
+									  '</div>'; 
+						
+						var msg_list = document.getElementById("msg");
+						msg_list.insertAdjacentHTML("beforeend", msgHtml);
+						
+						playReceiveMsgSound();
+					}
 					
-					var msg_list = document.getElementById("msg");
-					msg_list.insertAdjacentHTML("beforeend", msgHtml);
-					
-					playReceiveMsgSound();
+
 				}
 				
 				// 发送消息
 				function sendMsg(faceImg, msg, friendPublicKey) {
 							
 					
-					// 用接收方public key对消息进行加密发送
-					var encryptedResult = cryptico.encrypt(msg, friendPublicKey);
+					var me = app.getUserGlobalInfo();
+					
+					var myPrivateKey = deserializeRSAKey(me.privateKey);
+					// console.log("my private key is: " + JSON.stringify(myPrivateKey));
+					
+					
+					// 用接收方public key进行加密发送, 用发送方的private key进行签名
+					var encryptedResult = cryptico.encrypt(msg, friendPublicKey, myPrivateKey);
 
 					// console.log("encryptedResult is: " + encryptedResult.cipher);
 					// var decryptedResult = cryptico.decrypt(encryptedResult.cipher, myPrivateKey);

@@ -294,15 +294,20 @@
 					// 用接收方private key对消息进行解密
 					var me = app.getUserGlobalInfo();
 					var myPrivateKey = deserializeRSAKey(me.privateKey);
+					var decryptedResult = cryptico.decrypt(msg,myPrivateKey);
 					
-					// 保存朋友发过来的聊天记录到本地缓存
-					app.saveUserChatHistory(myId,friendUserId,cryptico.decrypt(msg,myPrivateKey).plaintext,2);
+					// 只刷新verified的消息
+					if (decryptedResult.signature == "verified") {
+						// 保存朋友发过来的聊天记录到本地缓存
+						app.saveUserChatHistory(myId,friendUserId,decryptedResult.plaintext,2);
+						
+						// 保存快照记录到本地缓存
+						app.saveUserChatSnapshot(myId,friendUserId,decryptedResult.plaintext,isRead);
+						
+						// 收到消息时，更新快照列表
+						loadingChatSnapshot();
+					}
 					
-					// 保存快照记录到本地缓存
-					app.saveUserChatSnapshot(myId,friendUserId,cryptico.decrypt(msg,myPrivateKey).plaintext,isRead);
-					
-					// 收到消息时，更新快照列表
-					loadingChatSnapshot();
 					
 				},
 			};
