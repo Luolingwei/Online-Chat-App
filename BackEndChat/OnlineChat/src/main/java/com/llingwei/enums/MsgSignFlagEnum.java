@@ -1,13 +1,10 @@
 package com.llingwei.enums;
 
-/**
- * 
- * @Description: 消息签收状态 枚举
- */
+
 public enum MsgSignFlagEnum {
 	
-	unsign(0, "未签收"),
-	signed(1, "已签收");	
+	unsign(0, "unsigned"),
+	signed(1, "signed");
 	
 	public final Integer type;
 	public final String content;

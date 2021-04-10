@@ -1,15 +1,11 @@
 package com.llingwei.enums;
 
-/**
- * 
- * @Description: 添加好友前置状态 枚举
- */
 public enum SearchFriendsStatusEnum {
 	
 	SUCCESS(0, "OK"),
-	USER_NOT_EXIST(1, "无此用户..."),	
-	NOT_YOURSELF(2, "不能添加你自己..."),			
-	ALREADY_FRIENDS(3, "该用户已经是你的好友...");
+	USER_NOT_EXIST(1, "No such user..."),
+	NOT_YOURSELF(2, "You can not add yourself..."),
+	ALREADY_FRIENDS(3, "This user is already your friend...");
 	
 	public final Integer status;
 	public final String msg;

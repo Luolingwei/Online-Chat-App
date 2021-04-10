@@ -17,12 +17,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class FileUtils {
+
 	/**
-	 * 根据url拿取file
-	 * 
-	 * @param url
-	 * @param suffix
-	 *            文件后缀名
+	 * obtain file according to url
+	 *
 	 */
 	public static File createFileByUrl(String url, String suffix) {
 		byte[] byteFile = getImageFromNetByUrl(url);
@@ -35,10 +33,9 @@ public class FileUtils {
 	}
 
 	/**
-	 * 根据地址获得数据的字节流
+	 * obtain data stream according to address
 	 * 
 	 * @param strUrl
-	 *            网络连接地址
 	 * @return
 	 */
 	private static byte[] getImageFromNetByUrl(String strUrl) {
@@ -57,10 +54,9 @@ public class FileUtils {
 	}
 
 	/**
-	 * 从输入流中获取数据
+	 * obtain data from input stream
 	 * 
 	 * @param inStream
-	 *            输入流
 	 * @return
 	 * @throws Exception
 	 */
@@ -75,13 +71,13 @@ public class FileUtils {
 		return outStream.toByteArray();
 	}
 
-	// 创建临时文件
+	// create temp file
 	private static File getFileFromBytes(byte[] b, String suffix) {
 		BufferedOutputStream stream = null;
 		File file = null;
 		try {
 			file = File.createTempFile("pattern", "." + suffix);
-			System.out.println("临时文件位置：" + file.getCanonicalPath());
+			System.out.println("location of temp file：" + file.getCanonicalPath());
 			FileOutputStream fstream = new FileOutputStream(file);
 			stream = new BufferedOutputStream(fstream);
 			stream.write(b);
@@ -101,7 +97,6 @@ public class FileUtils {
 
 	public static MultipartFile createImg(String url) {
 		try {
-			// File转换成MutipartFile
 			File file = FileUtils.createFileByUrl(url, "jpg");
 			FileInputStream inputStream = new FileInputStream(file);
 			MultipartFile multipartFile = new MockMultipartFile(file.getName(), inputStream);
@@ -114,23 +109,16 @@ public class FileUtils {
 
 	public static MultipartFile fileToMultipart(String filePath) {
 		try {
-			// File转换成MutipartFile
 			File file = new File(filePath);
 			FileInputStream inputStream = new FileInputStream(file);
 			MultipartFile multipartFile = new MockMultipartFile(file.getName(), "png", "image/png", inputStream);
 			return multipartFile;
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return null;
 		}
 	}
 
-	public static void main(String[] args) {
-		// WebFileUtils.createFileByUrl("http://122.152.205.72:88/group1/M00/00/01/CpoxxFr7oIaAZ0rOAAC0d3GKDio580.png",
-		// "png");
-		// WebFileUtils.createImg("http://122.152.205.72:88/group1/M00/00/01/CpoxxFr7oIaAZ0rOAAC0d3GKDio580.png");
-	}
 
 	public static boolean base64ToFile(String filePath, String base64Data)  throws Exception {
 		String dataPrix = "";
@@ -148,9 +136,8 @@ public class FileUtils {
             }
         }
 
-        // 因为BASE64Decoder的jar问题，此处使用spring框架提供的工具包
         byte[] bs = Base64Utils.decodeFromString(data);
-        // 使用apache提供的工具类操作流
+        // use tool class provided by apache
         org.apache.commons.io.FileUtils.writeByteArrayToFile(new File(filePath), bs);
         
         return true;

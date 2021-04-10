@@ -9,29 +9,29 @@ import io.netty.handler.timeout.IdleStateEvent;
 
 
 /**
- * 用户监测chennel的心跳handler
- * 继承ChannelInboundHandlerAdapter, 从而不需要实现channelRead0方法
+ * handler to monitor channel's heart beat
+ * extend ChannelInboundHandlerAdapter, so we don't need to implement channelRead0 method
  */
 public class HeartBeatHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
 
-        // 判断evt是否是IdleStateEvent, 用于出发用户事件, 包含读空闲/写空闲/读写空闲
+        // judge whether evt is IdleStateEvent
         if (evt instanceof IdleStateEvent){
-            IdleStateEvent event = (IdleStateEvent) evt; // 强制类型转换
+            IdleStateEvent event = (IdleStateEvent) evt;
 
-            // 读空闲
+            // read idle
             if (event.state() == IdleState.READER_IDLE){
-                System.out.println("进入读空闲");
+                System.out.println("enter read idle");
             } else if (event.state() == IdleState.WRITER_IDLE){
-                System.out.println("进入写空闲");
+                System.out.println("enter write idle");
             } else if (event.state() == IdleState.ALL_IDLE){
-                System.out.println("channel关闭前, users的数量为: " + ChatHandler.users.size());
+                System.out.println("before channel close, users number is: " + ChatHandler.users.size());
                 Channel channel = ctx.channel();
-                // 关闭无用的channel, 以防资源浪费
+                // close unused channels
                 channel.close();
-                System.out.println("channel关闭后, users的数量为: " + ChatHandler.users.size());
+                System.out.println("after channel close, users number is: " + ChatHandler.users.size());
             }
 
         }

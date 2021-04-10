@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class NettyBooter implements ApplicationListener<ContextRefreshedEvent> {
 
-    // 监听springboot启动netty服务器
+    // listen whether springboot has started netty server
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
 

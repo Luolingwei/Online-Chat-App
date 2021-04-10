@@ -57,7 +57,7 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(propagation = Propagation.SUPPORTS)
     @Override
-    public boolean queryUsernameIsExist(String username) {
+    public boolean queryUsernameExist(String username) {
 
         Users user = new Users();
         user.setUsername(username);
@@ -68,7 +68,7 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(propagation = Propagation.SUPPORTS)
     @Override
-    public Users queryUserForLogin(String username, String password) {
+    public Users queryUserLoginSuccess(String username, String password) {
 
 
         Example userExample = new Example(Users.class);
@@ -87,7 +87,7 @@ public class UserServiceImpl implements UserService {
 
         String userId = sid.nextShort();
 
-        // 为每个用户生成唯一的二维码
+        // generate unique QR Code for each user
 
         String uploadPathDB = "/" + userId + "/qrcode/qrcode.png";
         String localqrCodePath = FILE_SPACE + uploadPathDB;
@@ -106,7 +106,7 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(propagation = Propagation.REQUIRED)
     @Override
-    public Users updateUserInfo(Users user) {
+    public Users updateUser(Users user) {
 
         usersMapper.updateByPrimaryKeySelective(user);
         return queryUserById(user.getId());
@@ -121,20 +121,20 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(propagation = Propagation.SUPPORTS)
     @Override
-    public Integer preconditionSearchFriends(String myUserId, String friendUsername) {
+    public Integer SearchFriendsPreCheck(String myUserId, String friendUsername) {
 
-        // 1 搜索的用户不存在，"返回无此用户"
-        Users result = querUserInfobyName(friendUsername);
+        // 1 searched user doesn't exist，return NOT_EXIST
+        Users result = querUserbyName(friendUsername);
         if (result == null){
             return SearchFriendsStatusEnum.USER_NOT_EXIST.status;
         }
 
-        // 2 搜索的是自己，返回"不能添加自己"
+        // 2 search himself，return NOT_YOURSELF
         if (myUserId.equals(result.getId())){
             return SearchFriendsStatusEnum.NOT_YOURSELF.status;
         }
 
-        // 3 搜索的已经是自己的好友，返回"该用户已经是你的好友"
+        // 3 search user who is already in his friend list，return ALREADY_FRIENDS
         Example example = new Example(MyFriends.class);
         Criteria criteria = example.createCriteria();
         criteria.andEqualTo("myUserId",myUserId);
@@ -150,7 +150,7 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(propagation = Propagation.SUPPORTS)
     @Override
-    public Users querUserInfobyName(String username){
+    public Users querUserbyName(String username){
 
         Example example = new Example(Users.class);
         Criteria criteria = example.createCriteria();
@@ -164,10 +164,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public void sendFriendRequest(String myUserId, String friendUsername) {
 
-        // 根据用户名查询朋友信息
-        Users friend = querUserInfobyName(friendUsername);
+        // query friend Info by userName
+        Users friend = querUserbyName(friendUsername);
 
-        // 1 查询是否已经存在对应的request
+        // 1 query whether this request already exists
         Example example = new Example(FriendsRequest.class);
         Criteria criteria = example.createCriteria();
         criteria.andEqualTo("sendUserId",myUserId);
@@ -175,7 +175,7 @@ public class UserServiceImpl implements UserService {
         FriendsRequest request = friendsRequestMapper.selectOneByExample(example);
 
         if (request==null){
-            // 好友记录不存在，新增request, 已存在则不做任何操作
+            // request doesn't exist，add new request, do nothing if exist
             FriendsRequest savedRequest = new FriendsRequest();
             savedRequest.setId(sid.nextShort());
             savedRequest.setSendUserId(myUserId);
@@ -196,7 +196,7 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(propagation = Propagation.REQUIRED)
     @Override
-    // 忽略好友请求
+    // ignore friend request
     public void deleteFriendRequest(String acceptUserId, String senderUserId) {
 
         Example example = new Example(FriendsRequest.class);
@@ -209,14 +209,20 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(propagation = Propagation.REQUIRED)
     @Override
-    // 通过好友请求
-    public void passFriendRequest(String acceptUserId, String senderUserId) {
+    // accept friend request
+    public void acceptFriendRequest(String acceptUserId, String senderUserId) {
 
+        /**
+         * a friend request is accepted
+         * 1 save friend
+         * 2 save friend in reverse order
+         * 3 delete this friend request
+         */
         saveFriends(acceptUserId,senderUserId);
         saveFriends(senderUserId,acceptUserId);
         deleteFriendRequest(acceptUserId,senderUserId);
 
-        // 通过好友请求后，服务器通过websocket主动推送消息到请求发起者, 更新他的通讯录列表为最新
+        // after accepting friend request, server send msg to sender via websocket, in order to update his contact
         Channel sendChannel = UserChannelRel.get(senderUserId);
         if (sendChannel!=null){
             DataContent dataContent = new DataContent();
@@ -241,7 +247,7 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(propagation = Propagation.SUPPORTS)
     @Override
-    public List<MyFriendsVO> queryMyFriends(String userId) {
+    public List<MyFriendsVO> queryFriendList(String userId) {
         return usersMapperCustom.queryMyFriends(userId);
     }
 
@@ -264,7 +270,7 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(propagation = Propagation.REQUIRED)
     @Override
-    public void updateMsgSigned(List<String> msgIdList) {
+    public void updateMsgSignStatus(List<String> msgIdList) {
 
         usersMapperCustom.updateMsgSigned(msgIdList);
 
@@ -272,7 +278,7 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(propagation = Propagation.SUPPORTS)
     @Override
-    public List<com.llingwei.pojo.ChatMsg> getUnReadMsgList(String acceptUserId) {
+    public List<com.llingwei.pojo.ChatMsg> getUnSignedMsgList(String acceptUserId) {
 
         Example example = new Example(com.llingwei.pojo.ChatMsg.class);
         Criteria criteria = example.createCriteria();

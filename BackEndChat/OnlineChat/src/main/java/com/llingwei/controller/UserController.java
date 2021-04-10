@@ -9,7 +9,7 @@ import com.llingwei.pojo.vo.MyFriendsVO;
 import com.llingwei.pojo.vo.UsersVO;
 import com.llingwei.service.UserService;
 import com.llingwei.utils.FileUtils;
-import com.llingwei.utils.IMoocJSONResult;
+import com.llingwei.utils.JSONResult;
 import com.llingwei.utils.MD5Utils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -27,29 +27,29 @@ public class UserController extends BasicController{
     private UserService userService;
 
     @PostMapping("/RegistOrLogin")
-    public IMoocJSONResult RegistOrLogin(@RequestBody Users user) throws Exception {
+    public JSONResult RegistOrLogin(@RequestBody Users user) throws Exception {
 
-        // 0 判断用户名和密码不能为空
+        // 0 None judgement
         if (StringUtils.isBlank(user.getUsername()) || StringUtils.isBlank(user.getPassword())){
-            return IMoocJSONResult.errorMsg("用户名或密码不能为空...");
+            return JSONResult.errorMsg("Username or Password can NOT be empty...");
         }
 
-        // 1 判断用户名是否存在，存在则登录，不存在则注册
-        boolean usernameIsExist = userService.queryUsernameIsExist(user.getUsername());
+        // 1 Judge whether username exist, if exist - login, if not exist - register
+        boolean usernameIsExist = userService.queryUsernameExist(user.getUsername());
 
         Users userResult = null;
         if (usernameIsExist){
-            // 1.1 登录
-            userResult = userService.queryUserForLogin(user.getUsername(),MD5Utils.getMD5Str(user.getPassword()));
+            // 1.1 login
+            userResult = userService.queryUserLoginSuccess(user.getUsername(),MD5Utils.getMD5Str(user.getPassword()));
             if (userResult == null){
-                return IMoocJSONResult.errorMsg("用户名或密码不正确...");
+                return JSONResult.errorMsg("Username or Password Incorrect...");
             }
-            userResult = userService.querUserInfobyName(user.getUsername());
+            userResult = userService.querUserbyName(user.getUsername());
             userResult.setPublicKey(user.getPublicKey());
-            userService.updateUserInfo(userResult);
+            userService.updateUser(userResult);
 
         } else {
-            // 1.2 注册
+            // 1.2 register
 //            RSAController crypto = new RSAController();
 //            KeyPair keyPair = crypto.generateKey();
 //            PublicKey publicKey = keyPair.getPublic();
@@ -65,16 +65,31 @@ public class UserController extends BasicController{
             userResult = userService.saveUser(user);
         }
 
-        // 用userVO把不必要的字段滤掉，返回给前端
+        // filter out unnecessary fields，then return to frontend
         UsersVO usersVO = new UsersVO();
         BeanUtils.copyProperties(userResult,usersVO);
-        return IMoocJSONResult.ok(usersVO);
+        return JSONResult.ok(usersVO);
+    }
+
+    @PostMapping("/setNickname")
+    public JSONResult setNickname(@RequestBody UsersBO usersBO) throws Exception {
+
+        // update user info in DB
+        Users user = new Users();
+        user.setId(usersBO.getUserId());
+        user.setNickname(usersBO.getNickName());
+
+        // return updated user info to frontend
+        Users result = userService.updateUser(user);
+
+        return JSONResult.ok(result);
+
     }
 
     @PostMapping("/uploadFaceBase64")
-    public IMoocJSONResult uploadFaceBase64(@RequestBody UsersBO usersBO) throws Exception {
+    public JSONResult uploadFaceBase64(@RequestBody UsersBO usersBO) throws Exception {
 
-        // 获取前端传的Base64字符串转换为文件对象存储到本地
+        // obtain base64 string from frontend and store it into local DB
         String base64Data = usersBO.getFaceData();
         String uploadPathDB = "/" + usersBO.getUserId() + "/face" + "/userface64.png";
         String finalPath = FILE_SPACE + uploadPathDB;
@@ -86,171 +101,158 @@ public class UserController extends BasicController{
         File file = new File(dirPath);
         file.mkdirs();
 
-        // 将64位字符串转为file存到本地
+        // transfer base64 string to file
         FileUtils.base64ToFile(finalPath,base64Data);
 
-        // 更新数据库信息
+        // update user info in DB
         Users user = new Users();
         user.setId(usersBO.getUserId());
         user.setFaceImage(uploadPathDB);
         user.setFaceImageBig(uploadPathDB);
-        // 更新用户信息并把更新后的完整用户信息返回给前端
-        Users result = userService.updateUserInfo(user);
 
-        return IMoocJSONResult.ok(result);
+        // return updated user info to frontend
+        Users result = userService.updateUser(user);
 
-    }
-
-    @PostMapping("/setNickname")
-    public IMoocJSONResult setNickname(@RequestBody UsersBO usersBO) throws Exception {
-
-        // 更新数据库信息
-        Users user = new Users();
-        user.setId(usersBO.getUserId());
-        user.setNickname(usersBO.getNickName());
-        // 更新用户信息并把更新后的完整用户信息返回给前端
-        Users result = userService.updateUserInfo(user);
-
-        return IMoocJSONResult.ok(result);
+        return JSONResult.ok(result);
 
     }
 
-    /**
-     * 根据账号做匹配查询而不是模糊查询
-     */
     @PostMapping("/search")
-    public IMoocJSONResult searchUser(String myUserId, String friendUsername) throws Exception {
+    public JSONResult searchUser(String myUserId, String friendUsername) throws Exception {
 
-        // 判空
+        // None judgement
         if (StringUtils.isBlank(myUserId) || StringUtils.isBlank(friendUsername)){
-            return IMoocJSONResult.errorMsg("");
+            return JSONResult.errorMsg("");
         }
 
-        // 1 搜索的用户不存在，"返回无此用户"
-        // 2 搜索的是自己，返回"不能添加自己"
-        // 3 搜索的已经是自己的好友，返回"该用户已经是你的好友"
-        Integer searchResult = userService.preconditionSearchFriends(myUserId,friendUsername);
 
+        Integer searchResult = userService.SearchFriendsPreCheck(myUserId,friendUsername);
+
+            // 0 success
         if (searchResult == SearchFriendsStatusEnum.SUCCESS.status){
-            Users user = userService.querUserInfobyName(friendUsername);
+            Users user = userService.querUserbyName(friendUsername);
             UsersVO usersVO = new UsersVO();
             BeanUtils.copyProperties(user,usersVO);
-            return IMoocJSONResult.ok(usersVO);
+            return JSONResult.ok(usersVO);
 
         } else {
+            // 1 user searched doesn't exist，return ""No such user"
+            // 2 search himself，return "You can not add yourself..."
+            // 3 search someone in his friend list，return "This user is already your friend..."
             String errormsg = SearchFriendsStatusEnum.getMsgByKey(searchResult);
-            return IMoocJSONResult.errorMsg(errormsg);
+            return JSONResult.errorMsg(errormsg);
         }
 
     }
 
     @PostMapping("/addFriendRequest")
-    public IMoocJSONResult addFriendRequest(String myUserId, String friendUsername) throws Exception {
+    public JSONResult addFriendRequest(String myUserId, String friendUsername) throws Exception {
 
-        // 判空
+        // None judgement
         if (StringUtils.isBlank(myUserId) || StringUtils.isBlank(friendUsername)){
-            return IMoocJSONResult.errorMsg("");
+            return JSONResult.errorMsg("");
         }
 
-        // 1 搜索的用户不存在，"返回无此用户"
-        // 2 搜索的是自己，返回"不能添加自己"
-        // 3 搜索的已经是自己的好友，返回"该用户已经是你的好友"
-        Integer searchResult = userService.preconditionSearchFriends(myUserId,friendUsername);
+        Integer searchResult = userService.SearchFriendsPreCheck(myUserId,friendUsername);
 
+            // 0 success
         if (searchResult == SearchFriendsStatusEnum.SUCCESS.status){
 
             userService.sendFriendRequest(myUserId, friendUsername);
 
         } else {
+            // 1 user searched doesn't exist，return ""No such user"
+            // 2 search himself，return "You can not add yourself..."
+            // 3 search someone in his friend list，return "This user is already your friend..."
             String errormsg = SearchFriendsStatusEnum.getMsgByKey(searchResult);
-            return IMoocJSONResult.errorMsg(errormsg);
+            return JSONResult.errorMsg(errormsg);
         }
 
-        return IMoocJSONResult.ok();
+        return JSONResult.ok();
 
     }
 
     @PostMapping("/queryFriendRequests")
-    public IMoocJSONResult queryFriendRequests(String userId) throws Exception {
+    public JSONResult queryFriendRequests(String userId) throws Exception {
 
-        // 判空
+        // None judgement
         if (StringUtils.isBlank(userId) ){
-            return IMoocJSONResult.errorMsg("");
+            return JSONResult.errorMsg("");
         }
 
-        // 查询用户接收到的朋友请求
-        return IMoocJSONResult.ok(userService.queryFriendRequestList(userId));
+        // Query this user's friend requests
+        return JSONResult.ok(userService.queryFriendRequestList(userId));
     }
 
-    // 接收方通过或者忽略朋友请求
+    // receiver can accept/ignore friend request
     @PostMapping("/operFriendRequest")
-    public IMoocJSONResult queryFriendRequests(String acceptUserId, String senderUserId, Integer operType) throws Exception {
+    public JSONResult queryFriendRequests(String acceptUserId, String senderUserId, Integer operType) throws Exception {
 
-        // 判空参数
+        // None judgement
         if (StringUtils.isBlank(acceptUserId) || StringUtils.isBlank(senderUserId) || operType==null){
-            return IMoocJSONResult.errorMsg("");
+            return JSONResult.errorMsg("");
         }
 
-        // 如果operType没有对应的枚举值，抛错
+        // if operType is not 0 or 1, return error
         if (StringUtils.isBlank(OperatorFriendRequestTypeEnum.getMsgByType(operType))){
-            return IMoocJSONResult.errorMsg("");
+            return JSONResult.errorMsg("");
         }
 
         if (operType.equals(OperatorFriendRequestTypeEnum.IGNORE.type)){
-            // 忽略好友请求，直接删除request记录
+            // friend request is ignored，delete request in DB
             userService.deleteFriendRequest(acceptUserId,senderUserId);
         } else if (operType.equals(OperatorFriendRequestTypeEnum.PASS.type)){
-            // 通过好友请求，删除request记录并互相保存好友
-            userService.passFriendRequest(acceptUserId,senderUserId);
+            // friend request is accepted，delete request in DB, then save friends relationship
+            userService.acceptFriendRequest(acceptUserId,senderUserId);
         }
 
-        // 查询当前用户的好友列表 (获取最新的好友列表)
-        List<MyFriendsVO> myFriendsVOList = userService.queryMyFriends(acceptUserId);
+        // query current user's friend list (obtain updated friend list)
+        List<MyFriendsVO> myFriendsVOList = userService.queryFriendList(acceptUserId);
 
-        return IMoocJSONResult.ok(myFriendsVOList);
+        return JSONResult.ok(myFriendsVOList);
     }
 
-    // 查询当前用户的好友列表
+    // query current user's friend list
     @PostMapping("/queryMyFriends")
-    public IMoocJSONResult queryMyFriends(String userId) throws Exception {
+    public JSONResult queryMyFriends(String userId) throws Exception {
 
-        // 判空
+        // None judgement
         if (StringUtils.isBlank(userId) ){
-            return IMoocJSONResult.errorMsg("");
+            return JSONResult.errorMsg("");
         }
 
-        // 查询当前用户的好友列表
-        return IMoocJSONResult.ok(userService.queryMyFriends(userId));
+        // query current user's friend list
+        return JSONResult.ok(userService.queryFriendList(userId));
     }
 
-    // 用户手机端获取未签收的消息列表 (用户离线,没有channel, 没有在onmsg中获取)
+    // obtain unread msg list from phone
     @PostMapping("/getUnReadMsgList")
-    public IMoocJSONResult getUnReadMsgList(String acceptUserId) throws Exception {
+    public JSONResult getUnReadMsgList(String acceptUserId) throws Exception {
 
-        // 判空
+        // None judgement
         if (StringUtils.isBlank(acceptUserId) ){
-            return IMoocJSONResult.errorMsg("");
+            return JSONResult.errorMsg("");
         }
 
-        // 获取未读消息列表
-        List<ChatMsg> unReadMagList = userService.getUnReadMsgList(acceptUserId);
+        // obtain unread msg list
+        List<ChatMsg> unReadMagList = userService.getUnSignedMsgList(acceptUserId);
 
-        return IMoocJSONResult.ok(unReadMagList);
+        return JSONResult.ok(unReadMagList);
     }
 
-    // 根据userId获取用户的publicKey
+    // obtain user's publicKey by user's id
     @PostMapping("/getUserPublicKey")
-    public IMoocJSONResult getUserPublicKey(String userId) throws Exception {
+    public JSONResult getUserPublicKey(String userId) throws Exception {
 
-        // 判空
+        // None judgement
         if (StringUtils.isBlank(userId) ){
-            return IMoocJSONResult.errorMsg("");
+            return JSONResult.errorMsg("");
         }
 
-        // 获取未读消息列表
+        // obtain user's public key
         String publicKey = userService.searchPublicKey(userId);
 
-        return IMoocJSONResult.ok(publicKey);
+        return JSONResult.ok(publicKey);
     }
 
 }

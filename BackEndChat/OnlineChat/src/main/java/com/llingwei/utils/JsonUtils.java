@@ -6,16 +6,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-/**
- * @Description: 自定义响应结构, 转换类
- */
+
 public class JsonUtils {
 
-    // 定义jackson对象
+    // define jackson object
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     /**
-     * 将对象转换成json字符串。
+     * transfer object to json string。
      * <p>Title: pojoToJson</p>
      * <p>Description: </p>
      * @param data
@@ -32,10 +30,9 @@ public class JsonUtils {
     }
     
     /**
-     * 将json结果集转化为对象
+     * transfer json results to objects
      * 
-     * @param jsonData json数据
-     * @param clazz 对象中的object类型
+     * @param jsonData json data
      * @return
      */
     public static <T> T jsonToPojo(String jsonData, Class<T> beanType) {
@@ -49,7 +46,7 @@ public class JsonUtils {
     }
     
     /**
-     * 将json数据转换成pojo对象list
+     * transfer json data to pojo object list
      * <p>Title: jsonToList</p>
      * <p>Description: </p>
      * @param jsonData

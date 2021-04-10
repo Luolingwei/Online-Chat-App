@@ -8,9 +8,9 @@ import org.springframework.context.annotation.ComponentScan;
 import tk.mybatis.spring.annotation.MapperScan;
 
 @SpringBootApplication
-// 扫描mybatis mapper的包路径
+// scan path of mybatis mapper
 @MapperScan(basePackages = "com.llingwei.mapper")
-// 扫描 所有需要的包, 包含一些自用的工具类包 所在的路径
+// scan all needed packages, including some tool classed used by this project
 @ComponentScan(basePackages= {"com.llingwei","org.n3r.idworker"})
 public class Application {
 

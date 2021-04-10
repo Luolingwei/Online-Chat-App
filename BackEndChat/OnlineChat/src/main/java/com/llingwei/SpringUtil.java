@@ -4,9 +4,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
-/**
- * @Description: 提供手动获取被spring管理的bean对象
- */
+
 public class SpringUtil implements ApplicationContextAware {
 	
 	private static ApplicationContext applicationContext;
@@ -18,22 +16,22 @@ public class SpringUtil implements ApplicationContextAware {
 		}
 	}
 
-	// 获取applicationContext
+	// obtain applicationContext
 	public static ApplicationContext getApplicationContext() {
 		return applicationContext;
 	}
 
-	// 通过name获取 Bean.
+	// obtain Bean via name
 	public static Object getBean(String name) {
 		return getApplicationContext().getBean(name);
 	}
 
-	// 通过class获取Bean.
+	// obtain Bean via class
 	public static <T> T getBean(Class<T> clazz) {
 		return getApplicationContext().getBean(clazz);
 	}
 
-	// 通过name,以及Clazz返回指定的Bean
+	// return corresponding Bean via name and Clazz
 	public static <T> T getBean(String name, Class<T> clazz) {
 		return getApplicationContext().getBean(name, clazz);
 	}

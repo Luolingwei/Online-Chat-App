@@ -7,7 +7,7 @@ import org.apache.commons.codec.binary.Base64;
 public class MD5Utils {
 
 	/**
-	 * @Description: 对字符串进行md5加密 
+	 * @Description: conduct MD5 encryption for String
 	 */
 	public static String getMD5Str(String strValue) throws Exception {
 		MessageDigest md5 = MessageDigest.getInstance("MD5");

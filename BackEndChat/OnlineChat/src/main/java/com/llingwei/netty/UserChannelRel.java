@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 用户id和channel的关联关系处理
+ * Deal with UserId and Channel
  */
 public class UserChannelRel {
 
@@ -21,8 +21,7 @@ public class UserChannelRel {
 
     public static void output(){
         for (Map.Entry<String, Channel> entry:manager.entrySet()){
-            System.out.println("UserId: " + entry.getKey() +
-                               " ChannelId: " + entry.getValue().id().asLongText());
+            System.out.println("UserId: " + entry.getKey() + " ChannelId: " + entry.getValue().id().asLongText());
         }
     }
 

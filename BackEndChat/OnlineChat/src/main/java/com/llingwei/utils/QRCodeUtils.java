@@ -25,21 +25,20 @@ import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 public class QRCodeUtils {
 	
 	public void createQRCode(String filePath, String content) {
-		int width=300;      		//图片的宽度
-        int height=300;     		//图片的高度
-        String format="png";    	//图片的格式
-//        String content="风间影月";     //内容
+		int width=300;      		//width of picture
+        int height=300;     		//height of picture
+        String format="png";    	//format of picture
 
         /**
-         * 定义二维码的参数
+         * define parameters of QR code
          */
         HashMap hints=new HashMap();
-        hints.put(EncodeHintType.CHARACTER_SET,"utf-8");    //指定字符编码为“utf-8”
-        hints.put(EncodeHintType.ERROR_CORRECTION,ErrorCorrectionLevel.M);  //指定二维码的纠错等级为中级
-        hints.put(EncodeHintType.MARGIN, 2);    //设置图片的边距
+        hints.put(EncodeHintType.CHARACTER_SET,"utf-8");    //set encode as “utf-8”
+        hints.put(EncodeHintType.ERROR_CORRECTION,ErrorCorrectionLevel.M);  //set ErrorCorrectionLevel as medium
+        hints.put(EncodeHintType.MARGIN, 2);    //set margin of picture
 
         /**
-         * 生成二维码
+         * generate QR Code
          */
         try {
             BitMatrix bitMatrix=new MultiFormatWriter().encode(content, BarcodeFormat.QR_CODE, width, height,hints);
@@ -59,7 +58,7 @@ public class QRCodeUtils {
             BinaryBitmap binaryBitmap=new BinaryBitmap(new HybridBinarizer
                                     (new BufferedImageLuminanceSource(image)));
             HashMap hints=new HashMap();
-            hints.put(EncodeHintType.CHARACTER_SET,"utf-8");    //指定字符编码为“utf-8”
+            hints.put(EncodeHintType.CHARACTER_SET,"utf-8");
             Result result=formatReader.decode(binaryBitmap,hints);
             return result.toString();
         } catch (Exception e) {

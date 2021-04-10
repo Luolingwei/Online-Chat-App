@@ -1,13 +1,10 @@
 package com.llingwei.enums;
 
-/**
- * 
- * @Description: 忽略或者通过 好友请求的枚举
- */
+
 public enum OperatorFriendRequestTypeEnum {
 	
-	IGNORE(0, "忽略"),
-	PASS(1, "通过");
+	IGNORE(0, "ignore"),
+	PASS(1, "accept");
 	
 	public final Integer type;
 	public final String msg;
