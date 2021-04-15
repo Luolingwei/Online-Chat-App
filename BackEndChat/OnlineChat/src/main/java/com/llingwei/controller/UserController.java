@@ -26,8 +26,8 @@ public class UserController extends BasicController{
     @Autowired
     private UserService userService;
 
-    @PostMapping("/RegistOrLogin")
-    public JSONResult RegistOrLogin(@RequestBody Users user) throws Exception {
+    @PostMapping("/RegisterLogin")
+    public JSONResult RegisterLogin(@RequestBody Users user) throws Exception {
 
         // 0 None judgement
         if (StringUtils.isBlank(user.getUsername()) || StringUtils.isBlank(user.getPassword())){
@@ -71,8 +71,8 @@ public class UserController extends BasicController{
         return JSONResult.ok(usersVO);
     }
 
-    @PostMapping("/setNickname")
-    public JSONResult setNickname(@RequestBody UsersBO usersBO) throws Exception {
+    @PostMapping("/updateNickname")
+    public JSONResult updateNickname(@RequestBody UsersBO usersBO) throws Exception {
 
         // update user info in DB
         Users user = new Users();
@@ -86,7 +86,7 @@ public class UserController extends BasicController{
 
     }
 
-    @PostMapping("/uploadFaceBase64")
+    @PostMapping("/uploadFaceImage")
     public JSONResult uploadFaceBase64(@RequestBody UsersBO usersBO) throws Exception {
 
         // obtain base64 string from frontend and store it into local DB
@@ -117,7 +117,7 @@ public class UserController extends BasicController{
 
     }
 
-    @PostMapping("/search")
+    @PostMapping("/searchUser")
     public JSONResult searchUser(String myUserId, String friendUsername) throws Exception {
 
         // None judgement
@@ -145,7 +145,7 @@ public class UserController extends BasicController{
 
     }
 
-    @PostMapping("/addFriendRequest")
+    @PostMapping("/addFriend")
     public JSONResult addFriendRequest(String myUserId, String friendUsername) throws Exception {
 
         // None judgement
@@ -172,8 +172,8 @@ public class UserController extends BasicController{
 
     }
 
-    @PostMapping("/queryFriendRequests")
-    public JSONResult queryFriendRequests(String userId) throws Exception {
+    @PostMapping("/searchFriendRequests")
+    public JSONResult searchFriendRequests(String userId) throws Exception {
 
         // None judgement
         if (StringUtils.isBlank(userId) ){
@@ -185,7 +185,7 @@ public class UserController extends BasicController{
     }
 
     // receiver can accept/ignore friend request
-    @PostMapping("/operFriendRequest")
+    @PostMapping("/handleFriendRequest")
     public JSONResult queryFriendRequests(String acceptUserId, String senderUserId, Integer operType) throws Exception {
 
         // None judgement
@@ -213,7 +213,7 @@ public class UserController extends BasicController{
     }
 
     // query current user's friend list
-    @PostMapping("/queryMyFriends")
+    @PostMapping("/searchMyFriends")
     public JSONResult queryMyFriends(String userId) throws Exception {
 
         // None judgement
@@ -226,7 +226,7 @@ public class UserController extends BasicController{
     }
 
     // obtain unread msg list from phone
-    @PostMapping("/getUnReadMsgList")
+    @PostMapping("/searchUnReadMsgList")
     public JSONResult getUnReadMsgList(String acceptUserId) throws Exception {
 
         // None judgement

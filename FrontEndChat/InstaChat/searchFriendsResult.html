@@ -75,7 +75,7 @@
 				btn_add_friend.addEventListener("tap", function(){
 					
 				
-					mui.ajax(app.serverUrl + "/u/addFriendRequest?myUserId=" + meInfo.id
+					mui.ajax(app.serverUrl + "/u/addFriend?myUserId=" + meInfo.id
 										   + "&friendUsername=" + yourFriend.username,{
 						data:{},
 						dataType:'json',//服务器返回json格式数据

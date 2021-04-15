@@ -47,7 +47,7 @@
 					var friendUsername = txt_friend_username.value;
 					plus.nativeUI.showWaiting("请稍后...");
 					
-					mui.ajax(app.serverUrl + "/u/search?myUserId=" + myuserId 
+					mui.ajax(app.serverUrl + "/u/searchUser?myUserId=" + myuserId 
 										   + "&friendUsername=" + friendUsername,{
 						data:{},
 						dataType:'json',//服务器返回json格式数据

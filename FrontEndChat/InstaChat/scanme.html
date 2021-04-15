@@ -71,7 +71,7 @@
 						var user = app.getUserGlobalInfo();
 						var myuserId = user.id;
 						// 调用搜索的同一接口，传入username
-						mui.ajax(app.serverUrl + "/u/search?myUserId=" + myuserId
+						mui.ajax(app.serverUrl + "/u/searchUser?myUserId=" + myuserId
 											   + "&friendUsername=" + friendUsername,{
 							data:{},
 							dataType:'json',//服务器返回json格式数据

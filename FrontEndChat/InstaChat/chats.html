@@ -317,7 +317,7 @@
 				
 				var user = app.getUserGlobalInfo();
 				var msgIds = ","; // 格式: ,1001,1002,1003,
-				mui.ajax(app.serverUrl + "/u/getUnReadMsgList?acceptUserId=" + user.id,{
+				mui.ajax(app.serverUrl + "/u/searchUnReadMsgList?acceptUserId=" + user.id,{
 					data:{},
 					dataType:'json',//服务器返回json格式数据
 					type:'post',//HTTP请求类型
@@ -421,7 +421,7 @@
 				
 				var user = app.getUserGlobalInfo();
 				
-				mui.ajax(app.serverUrl + "/u/queryMyFriends?userId=" + user.id,
+				mui.ajax(app.serverUrl + "/u/searchMyFriends?userId=" + user.id,
 				{
 					data:{},
 					dataType:'json',//服务器返回json格式数据
@@ -446,7 +446,7 @@
 				// 获取用户全局对象
 				var user = app.getUserGlobalInfo();
 				
-				mui.ajax(app.serverUrl + "/u/queryFriendRequests?userId=" + user.id,{
+				mui.ajax(app.serverUrl + "/u/searchFriendRequests?userId=" + user.id,{
 					data:{},
 					dataType:'json',//服务器返回json格式数据
 					type:'post',//HTTP请求类型
@@ -491,7 +491,7 @@
 			// 操作好友请求
 			function operatorFriendRequest(userId, friendId, operType) {
 				console.log(friendId);
-				mui.ajax(app.serverUrl + "/u/operFriendRequest?acceptUserId=" + userId
+				mui.ajax(app.serverUrl + "/u/handleFriendRequest?acceptUserId=" + userId
 												+ "&senderUserId=" + friendId
 												+ "&operType=" + operType,{
 					data:{},
