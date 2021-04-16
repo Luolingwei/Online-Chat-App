@@ -25,6 +25,8 @@
 
 		<header class="mui-bar mui-bar-nav title" style="position: fixed;">
 			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left title-color"></a>
+			<a id="link_verify_public_key" class="mui-icon mui-icon-right-nav mui-pull-right"
+				style="color: white; font-size: 14px; line-height: 25px;">Verify</a>
 			<h1 class="mui-title title-color"><b id="chatting-nickname">InstaChat</b></h1>
 		</header>
 
@@ -187,6 +189,31 @@
 							}
 						});
 
+					});
+					
+					
+					
+					var link_verify_public_key = document.getElementById("link_verify_public_key");
+					link_verify_public_key.addEventListener("tap",function(){
+						
+						// 获取friendUserId的publicKey
+						mui.ajax(app.serverUrl + "/u/getUserPublicKey?userId=" + friendUserId,{
+							data:{},
+							dataType:'json',//服务器返回json格式数据
+							type:'post',//HTTP请求类型
+							timeout:10000,//超时时间设置为10秒；
+							headers:{'Content-Type':'application/json'},	              
+							success:function(data){
+								if (data.status == 200){
+									// public key 获取成功, 发送消息
+									var friendPublicKey = data.data;
+									console.log("Show friend's public key: " + friendPublicKey);
+									app.showToast(friendNickname + "'s public key: " + friendPublicKey);
+
+								}
+							}
+						});
+						
 					});
 					
 
