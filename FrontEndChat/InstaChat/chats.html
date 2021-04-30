@@ -189,12 +189,12 @@
 				},
 				
 				reChat: function(msg){
-					console.log("消息重新发送...");
+					console.log("msg resend...");
 					CHAT.socket.send(msg);
 				},
 				
 				wsopen: function(){
-					console.log("websocket连接已建立...");
+					console.log("websocket connection established...");
 					
 					var me = app.getUserGlobalInfo();
 					
@@ -216,11 +216,11 @@
 				},
 				
 				wsclose: function(){
-					console.log("websocket连接已关闭...");
+					console.log("websocket connection closed...");
 				},
 				
 				wserror: function(){
-					console.log("websocket连接错误...");
+					console.log("websocket connection error...");
 				},
 				
 				signMsgList: function(unSignedMsgIds){
@@ -261,7 +261,7 @@
 					}
 					
 					// 如果不是重新拉取好友列表的请求, 接收到其他用户发过来的消息
-					console.log("接受到消息：" + e.data);
+					console.log("Msg Received：" + e.data);
 					var chatMsg = dataContent.chatMsg;
 					var msg = chatMsg.msg;
 					var friendUserId = chatMsg.senderId;
