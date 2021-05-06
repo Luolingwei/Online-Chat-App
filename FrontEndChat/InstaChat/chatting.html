@@ -182,6 +182,13 @@
 									console.log("Msg sent: " + JSON.stringify(dataContent));
 									// wsWebview.evalJS("CHAT.chat('" + msg_text_val + "')");
 									
+									// // testing
+									// var chatMsg = new app.ChatMsg(me.id,friendUserId,"unsigned raw text",null);
+									// // 构建DataContent对象
+									// var dataContent = new app.DataContent(app.CHAT, chatMsg, null);
+									// wsWebview.evalJS("CHAT.chat('" + JSON.stringify(dataContent) + "')");
+									// console.log("unsigned raw text sent: " + JSON.stringify(dataContent));
+									
 									// 测试接收数据
 									// receiveMsg(msg_text_val);
 
